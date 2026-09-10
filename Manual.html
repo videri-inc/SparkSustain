@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SparkSustain Manual</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #FCFAF6; --ink: #211B12; --muted: #6E6355;
+    --amber: #E8930C; --amber-ink: #9A5F03; --moon: #4C5B73;
+    --line: #E6DFD2; --card: #F5F0E6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #171310; --ink: #EFE7DA; --muted: #A29684;
+      --amber: #F2A93B; --amber-ink: #F2A93B; --moon: #8FA3C0;
+      --line: #322B22; --card: #201A14;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.0625rem; line-height: 1.6;
+  }
+  .wrap { max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .dimmer {
+    height: 6px; border-radius: 3px; margin-bottom: 2.25rem;
+    background: linear-gradient(90deg, var(--amber) 0%, var(--amber) 55%, var(--moon) 78%, var(--ink) 100%);
+  }
+  h1 {
+    font-family: "Bricolage Grotesque", "Arial Black", sans-serif;
+    font-weight: 800; font-size: clamp(2.2rem, 6vw, 3rem);
+    line-height: 1.05; letter-spacing: -0.015em; margin: 0 0 0.5rem;
+  }
+  .tagline { font-size: 1.15rem; color: var(--muted); margin: 0 0 2.5rem; }
+  h2 {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: 1.55rem; letter-spacing: -0.01em; margin: 3rem 0 0.75rem;
+    padding-top: 1.5rem; border-top: 1px solid var(--line);
+  }
+  h3 { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 1.15rem; margin: 1.5rem 0 0.4rem; }
+  .menupath, kbd {
+    font-family: "Spline Sans Mono", ui-monospace, monospace; font-size: 0.86em;
+    background: var(--card); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.08em 0.4em; white-space: nowrap;
+  }
+  code { font-family: "Spline Sans Mono", ui-monospace, monospace; font-size: 0.88em; color: var(--amber-ink); }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: "Spline Sans Mono", ui-monospace, monospace; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+  }
+  .on { color: var(--amber-ink); font-weight: 600; white-space: nowrap; }
+  .off { color: var(--moon); font-weight: 600; white-space: nowrap; }
+  .note {
+    border-left: 3px solid var(--amber); background: var(--card);
+    border-radius: 0 8px 8px 0; padding: 0.75rem 1.1rem; margin: 1rem 0;
+  }
+  dl.menu dt { font-weight: 600; margin-top: 1rem; }
+  dl.menu dd { margin: 0.15rem 0 0; color: var(--muted); }
+  ol li, ul li { margin-bottom: 0.4rem; }
+  a { color: var(--amber-ink); text-underline-offset: 2px; }
+  footer { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="dimmer"></div>
+  <h1>SparkSustain Manual</h1>
+  <p class="tagline">The Spark canvases near your desk follow your MacBook — on when you're working at the office, dark when you're not.</p>
+
+  <h2>How it decides</h2>
+  <p>SparkSustain applies one simple rule, re-checked every time your Mac wakes, sleeps, or changes network:</p>
+  <table>
+    <tr><th>Your MacBook</th><th>At the office?</th><th>Your Sparks</th></tr>
+    <tr><td>Awake, screens on</td><td class="on">Yes</td><td class="on">On, at your wake brightness</td></tr>
+    <tr><td>Awake, screens on</td><td class="off">No — away</td><td class="off">Off (dark)</td></tr>
+    <tr><td>Asleep / lid closed</td><td>Anywhere</td><td class="off">Off (dark)</td></tr>
+  </table>
+  <p>"At the office" means your Mac's network matches the one you captured with
+  <span class="menupath">Set Current Network as Office</span>. Commands go through Videri's
+  cloud APIs using your own developer API key — nothing is installed on the Sparks.</p>
+  <p>Optionally, you can make being <em>at your desk</em> part of the rule:
+  <span class="menupath">Require Current Power Source (Desk)</span> captures the power
+  adapter your Mac is plugged into (say, your USB-C monitor or dock). From then on the
+  Sparks only come up when the Mac is drawing power from that exact source — on MagSafe,
+  battery, or any other charger they stay dark, even on the office network.</p>
+  <p>The menu bar icon shows the current state: ☀️ awake at the office · 🚫 awake but away · 🌙 asleep.</p>
+
+  <h2>The menu, item by item</h2>
+  <dl class="menu">
+    <dt>Status lines (top)</dt>
+    <dd>The first line reports the last action taken and why; the second shows the office network and whether you're on it.</dd>
+    <dt>Automation Enabled</dt>
+    <dd>Uncheck to pause all automatic changes — handy when someone is presenting on your Sparks. Re-checking immediately re-syncs.</dd>
+    <dt>Set Current Network as Office</dt>
+    <dd>Records the network you're on right now as "the office." Re-run it any time you move desks or the office network changes.</dd>
+    <dt>Require Current Power Source (Desk)</dt>
+    <dd>Optional: captures the adapter currently powering your Mac as a wake requirement — unplugged, on battery, or on a different charger, the Sparks stay dark. Click again ("Stop Requiring Desk Power") to remove the requirement.</dd>
+    <dt>Hold Wake Brightness / Hold Screens Off</dt>
+    <dd>Pin a state for a chosen time — 30 minutes, 1 hour, 2 hours, until end of day, or until you resume automation. The hold beats all automation rules until it expires; the menu shows the active hold and a <span class="menupath">Resume Automation Now</span> item ends it early. The keyboard toggle holds for 60 minutes by default.</dd>
+    <dt>Wake Brightness ▸</dt>
+    <dd>Choose the brightness (10–100%) your Sparks run at while you're working. Applies immediately if you're in the wake state.</dd>
+    <dt>Run Setup Assistant…</dt>
+    <dd>Re-runs the guided setup: credentials, Spark selection, office network. Safe to run any time — your existing choices are pre-filled.</dd>
+    <dt>Discover Canvases…</dt>
+    <dd>Fetches every canvas your account can see into a reference file and opens it.</dd>
+    <dt>Help</dt>
+    <dd>Opens this manual.</dd>
+    <dt>Check for Updates Now</dt>
+    <dd>SparkSustain updates itself from its GitHub releases (checks automatically every 4 hours; downloads are integrity-verified before installing). This forces a check immediately.</dd>
+    <dt>View Log</dt>
+    <dd>Opens the activity log — one line per event and per-Spark command result.</dd>
+    <dt>Start at Login</dt>
+    <dd>Keeps SparkSustain running automatically. Recommended: automation only works while the app is running.</dd>
+  </dl>
+
+  <h2>Keyboard shortcut</h2>
+  <p>Press <kbd>⌃⌥S</kbd> (Control + Option + S) from any app to toggle all your Sparks
+  between on and off. Works even when the menu is closed.</p>
+
+  <h2>First-time setup</h2>
+  <ol>
+    <li>Create an API key at <a href="https://developer.videri.com/dashboard">developer.videri.com/dashboard</a>
+        (log in → <strong>API Keys</strong> tab → create → <strong>copy it immediately</strong>, it's shown once).
+        No developer account? Ask the platform team.</li>
+    <li>Launch SparkSustain — the Setup Assistant opens on first run and walks you through:
+        pasting your credentials (verified live, so typos are caught), choosing your workspaces from a tree (including nested sub-workspaces) that scopes what SparkSustain may see and control, checking off your Sparks
+        from a searchable list, capturing the office network, optionally requiring your desk
+        power source — with a quick unplug/reconnect verification so SparkSustain proves
+        it can tell when you leave — and the first sync.</li>
+  </ol>
+  <div class="note">Your username, password, and API key are stored only on your Mac, in a file
+  readable only by your account. They are sent solely to Videri's own API.</div>
+  <div class="note"><strong>Brightness schedule takeover:</strong> when you confirm your Spark
+  selection, SparkSustain warns you and then <strong>permanently deletes any existing brightness
+  schedules</strong> on those specific displays from the Videri platform, so they can't fight its
+  on/off control. The managed displays are then set to their new <strong>default state: 0%
+  brightness / display off</strong> — they only light up while your Mac meets the wake conditions.
+  Other displays are untouched. SparkSustain then enforces its own state perpetually —
+  re-asserting it every 10 minutes — so a Spark that reboots, misses a command, or gets adjusted
+  elsewhere is pulled back within minutes.</div>
+
+  <h2>What's new in 1.2</h2>
+  <ul>
+    <li><strong>Brightness schedule takeover</strong> — with warning, platform schedules on managed displays are deleted and the displays default to 0% / off.</li>
+    <li><strong>Perpetual enforcement</strong> — the decided state is re-asserted every 10 minutes; displays stay in their state until the Mac meets the wake conditions.</li>
+    <li><strong>Desk power requirement</strong> — optional wake condition tied to your desk charger/dock; disconnecting it darkens the Sparks within ~3 seconds. Now part of the Setup Assistant, with detect-now or decide-later.</li>
+  </ul>
+
+  <h2>Troubleshooting</h2>
+  <h3>"Couldn't sign in" during setup</h3>
+  <p>Re-check username, password, and API key. Keys created with an expiry date stop working
+  when it passes — create a fresh key.</p>
+  <h3>Sparks don't react</h3>
+  <p>Open <span class="menupath">View Log</span>: every command logs a named OK/FAILED line per Spark.
+  <code>DEVICE_OFFLINE</code> means that Spark has no network — check its connection.
+  Re-run <span class="menupath">Run Setup Assistant…</span> to confirm the right Sparks are selected.</p>
+  <h3>Sparks came on while I was away</h3>
+  <p>Check the office network line in the menu — if it says "not set (automating everywhere)",
+  capture your office network with <span class="menupath">Set Current Network as Office</span>.</p>
+  <h3>macOS blocks the app at install</h3>
+  <p>Right-click the installer → Open → Open (needed once for downloaded files), or
+  System Settings → Privacy &amp; Security → <strong>Open Anyway</strong>.</p>
+
+  <h2>Files SparkSustain uses</h2>
+  <ul>
+    <li><code>~/Library/Application Support/SparkSustain/config.json</code> — settings and credentials (private to your account)</li>
+    <li><code>~/Library/Application Support/SparkSustain/canvases.json</code> — the canvas list from Discover Canvases</li>
+    <li><code>~/Library/Logs/SparkSustain.log</code> — the activity log</li>
+  </ul>
+
+  <h2>Uninstalling</h2>
+  <ol>
+    <li>Menu bar icon → uncheck <span class="menupath">Start at Login</span>, then <span class="menupath">Quit SparkSustain</span>.</li>
+    <li>Delete <code>~/Applications/SparkSustain.app</code>.</li>
+    <li>Optionally delete the folder <code>~/Library/Application Support/SparkSustain</code> (this removes your stored credentials).</li>
+  </ol>
+
+  <footer>SparkSustain · built on Videri's developer APIs · questions → jay.leedy@videri.com</footer>
+</div>
+</body>
+</html>

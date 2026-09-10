@@ -1,0 +1,6 @@
+.DS_Store
+._*
+build/
+publish-out/
+dist/SparkSustain-Installer/SparkSustain.app/
+*.zip
