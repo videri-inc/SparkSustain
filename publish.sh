@@ -8,7 +8,7 @@
 set -euo pipefail
 
 PROJECT="${0:a:h}"
-REPO="leedyboy-26/SparkSustain"
+REPO="videri-inc/SparkSustain"
 NOTES="${1:-}"
 VERSION=$(grep -m1 -A0 'CFBundleShortVersionString' "$PROJECT/build.sh" | grep -oE '[0-9]+\.[0-9]+' | head -1)
 echo "Publishing SparkSustain v$VERSION to github.com/$REPO"

@@ -1,12 +1,18 @@
 # SparkSustain — Release Notes
 
+## Version 1.8 — September 14, 2026
+
+- Update hosting moved to the Videri organization repo
+  (github.com/videri-inc/SparkSustain). Installs poll that repo's update
+  manifest; release zips are GitHub Release assets, verified by SHA-256
+  before installing.
+
 ## Version 1.7 — September 10, 2026
 
 ### Auto-update now hosted on GitHub
-- Updates moved from the OneDrive-synced folder to GitHub
-  (github.com/leedyboy-26/SparkSustain): each app polls the repo's update
-  manifest over HTTPS on launch and every 4 hours — no folder syncing
-  required on any machine.
+- Updates moved from the OneDrive-synced folder to GitHub: each app polls
+  the repo's update manifest over HTTPS on launch and every 4 hours — no
+  folder syncing required on any machine.
 - Release zips are GitHub Release assets; every install verifies the
   SHA-256 from the manifest before installing. Rollback remains a
   one-file change (repoint the manifest at an earlier release).

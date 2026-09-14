@@ -32,10 +32,10 @@ namespace SparkSustain
 
     public static class AppInfo
     {
-        public const string Version = "1.7";
+        public const string Version = "1.8";
         // Manifest on the repo's main branch; zips are release assets.
         public const string DefaultUpdateUrl =
-            "https://raw.githubusercontent.com/leedyboy-26/SparkSustain/main/updates/manifest.json";
+            "https://raw.githubusercontent.com/videri-inc/SparkSustain/main/updates/manifest.json";
     }
 
     // ------------------------------------------------------------------ config

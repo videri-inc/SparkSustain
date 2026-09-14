@@ -675,7 +675,7 @@ final class VideriClient {
 /// branch so publishing/rolling back is a normal commit; the zips are
 /// GitHub Release assets referenced by absolute URL in the manifest.
 let defaultUpdateManifestURL =
-    "https://raw.githubusercontent.com/leedyboy-26/SparkSustain/main/updates/manifest.json"
+    "https://raw.githubusercontent.com/videri-inc/SparkSustain/main/updates/manifest.json"
 
 struct UpdateManifest: Codable {
     struct PlatformEntry: Codable {
