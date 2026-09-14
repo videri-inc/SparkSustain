@@ -1,0 +1,6 @@
+{
+  "version": "1.8",
+  "published": "2026-09-14",
+  "notes": "v1.8 — first release from the Videri org repo. Auto-update, workspace scoping with sub-workspace tree, manual holds, verified desk signatures.,
+  "windows": { "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.8/SparkSustain-Windows-1.8.zip", "sha256": "58ad153c31950b0df80a2bd522a6eb83c573ed43bbb8adeb8fb23ce315562188" }
+}
