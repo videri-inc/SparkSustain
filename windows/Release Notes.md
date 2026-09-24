@@ -1,5 +1,16 @@
 # SparkSustain — Release Notes
 
+## Version 1.9 — September 24, 2026
+
+- **New menu bar / tray icon.** The old sun glyph was the same SF Symbol most
+  weather apps use. It's now the Videri V mark from the app icon — solid when
+  your Sparks are lit, dimmed when they're dark. Hover for the reason.
+- **Fixed: the app could refuse to launch after a macOS upgrade.** Builds had
+  no pinned deployment target, so the compiler inferred one from the build
+  machine — which could land above the macOS version being shipped to, and
+  LaunchServices then rejected the app (error -10825). The target is now
+  pinned to macOS 13, matching what the bundle advertises.
+
 ## Version 1.8 — September 14, 2026
 
 - Update hosting moved to the Videri organization repo

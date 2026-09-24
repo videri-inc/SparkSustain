@@ -20,7 +20,11 @@ mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 cp "$PROJECT_DIR/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
 cp "$PROJECT_DIR/Manual.html" "$APP_DIR/Contents/Resources/Manual.html"
 
+# Pin the deployment target: without -target, swiftc infers a floor from the
+# build machine's OS, which can land ABOVE the OS you're shipping to and makes
+# LaunchServices refuse the app with -10825. Must match LSMinimumSystemVersion.
 swiftc -O \
+  -target "$(uname -m)-apple-macos13.0" \
   -framework AppKit \
   -framework Carbon \
   -framework IOKit \
@@ -37,8 +41,8 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
     <key>CFBundleName</key><string>SparkSustain</string>
     <key>CFBundleDisplayName</key><string>SparkSustain</string>
     <key>CFBundleIdentifier</key><string>com.videri.jay.sparksustain</string>
-    <key>CFBundleVersion</key><string>1.8</string>
-    <key>CFBundleShortVersionString</key><string>1.8</string>
+    <key>CFBundleVersion</key><string>1.9</string>
+    <key>CFBundleShortVersionString</key><string>1.9</string>
     <key>CFBundleExecutable</key><string>SparkSustain</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
@@ -83,8 +87,8 @@ if [[ -d "$XCODE_DEV" ]]; then
     <key>CFBundleName</key><string>SparkSustainControl</string>
     <key>CFBundleDisplayName</key><string>Spark Screens</string>
     <key>CFBundleIdentifier</key><string>com.videri.jay.sparksustain.control</string>
-    <key>CFBundleVersion</key><string>1.8</string>
-    <key>CFBundleShortVersionString</key><string>1.8</string>
+    <key>CFBundleVersion</key><string>1.9</string>
+    <key>CFBundleShortVersionString</key><string>1.9</string>
     <key>CFBundleExecutable</key><string>SparkSustainControl</string>
     <key>CFBundlePackageType</key><string>XPC!</string>
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>

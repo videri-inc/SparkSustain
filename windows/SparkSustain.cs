@@ -32,7 +32,7 @@ namespace SparkSustain
 
     public static class AppInfo
     {
-        public const string Version = "1.8";
+        public const string Version = "1.9";
         // Manifest on the repo's main branch; zips are release assets.
         public const string DefaultUpdateUrl =
             "https://raw.githubusercontent.com/videri-inc/SparkSustain/main/updates/manifest.json";
@@ -1887,25 +1887,24 @@ namespace SparkSustain
             catch (Exception e) { Log.Write("Startup toggle failed: " + e.Message); }
         }
 
+        // The Videri V mark, matching the app icon: amber when the Sparks are
+        // lit, slate when they're dark. (GDI+ y grows downward.)
         Icon MakeIcon(bool on)
         {
             var bmp = new Bitmap(16, 16);
             using (var g = Graphics.FromImage(bmp))
             {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
-                var color = on ? Color.FromArgb(242, 169, 59) : Color.FromArgb(76, 91, 115);
-                using (var brush = new SolidBrush(color))
-                    g.FillEllipse(brush, 2, 2, 12, 12);
-                if (on)
+                var color = on ? Color.FromArgb(242, 169, 59) : Color.FromArgb(128, 140, 158);
+                using (var pen = new Pen(color, 3.0f))
                 {
-                    using (var pen = new Pen(color, 1.6f))
-                    {
-                        g.DrawLine(pen, 8, 0, 8, 2);
-                        g.DrawLine(pen, 8, 14, 8, 16);
-                        g.DrawLine(pen, 0, 8, 2, 8);
-                        g.DrawLine(pen, 14, 8, 16, 8);
-                    }
+                    pen.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                    pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    g.DrawLine(pen, 3.0f, 2.8f, 8.3f, 13.0f);
                 }
+                using (var brush = new SolidBrush(color))
+                    g.FillEllipse(brush, 10.7f, 1.9f, 3.8f, 3.8f);
             }
             return Icon.FromHandle(bmp.GetHicon());
         }

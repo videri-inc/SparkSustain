@@ -13,8 +13,11 @@ NOTES="${1:-}"
 VERSION=$(grep -m1 -A0 'CFBundleShortVersionString' "$PROJECT/build.sh" | grep -oE '[0-9]+\.[0-9]+' | head -1)
 echo "Publishing SparkSustain v$VERSION to github.com/$REPO"
 
-command -v gh >/dev/null || { echo "ERROR: gh CLI not installed (brew install gh, then gh auth login)"; exit 1; }
-gh auth status >/dev/null 2>&1 || { echo "ERROR: gh not authenticated — run: gh auth login"; exit 1; }
+# gh is optional: with it, the release is cut automatically; without it, the
+# zips and manifest are still produced and the manifest is pushed, and you
+# upload the two zips on the release page (URL printed at the end).
+HAVE_GH=0
+if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then HAVE_GH=1; fi
 
 "$PROJECT/build.sh" >/dev/null
 
@@ -41,36 +44,53 @@ WIN_SHA=$(shasum -a 256 "$STAGE/SparkSustain-Windows-$VERSION.zip" | awk '{print
 BASE="https://github.com/$REPO/releases/download/v$VERSION"
 
 # --- GitHub release ----------------------------------------------------------
-if gh release view "v$VERSION" --repo "$REPO" >/dev/null 2>&1; then
-  echo "Release v$VERSION exists — replacing assets"
-  gh release upload "v$VERSION" --repo "$REPO" --clobber \
-    "$STAGE/SparkSustain-Mac-$VERSION.zip" "$STAGE/SparkSustain-Windows-$VERSION.zip"
-else
-  gh release create "v$VERSION" --repo "$REPO" \
-    --title "SparkSustain v$VERSION" \
-    --notes "${NOTES:-SparkSustain v$VERSION}" \
-    "$STAGE/SparkSustain-Mac-$VERSION.zip" "$STAGE/SparkSustain-Windows-$VERSION.zip"
+if (( HAVE_GH )); then
+  if gh release view "v$VERSION" --repo "$REPO" >/dev/null 2>&1; then
+    echo "Release v$VERSION exists — replacing assets"
+    gh release upload "v$VERSION" --repo "$REPO" --clobber \
+      "$STAGE/SparkSustain-Mac-$VERSION.zip" "$STAGE/SparkSustain-Windows-$VERSION.zip"
+  else
+    gh release create "v$VERSION" --repo "$REPO" \
+      --title "SparkSustain v$VERSION" \
+      --notes "${NOTES:-SparkSustain v$VERSION}" \
+      "$STAGE/SparkSustain-Mac-$VERSION.zip" "$STAGE/SparkSustain-Windows-$VERSION.zip"
+  fi
 fi
 
 # --- Manifest on main (the update feed) --------------------------------------
+# Build the manifest with a real JSON encoder — shell quoting cannot be
+# trusted with free-text release notes.
 mkdir -p "$PROJECT/updates"
-cat > "$PROJECT/updates/manifest.json" <<EOF
-{
-  "version": "$VERSION",
-  "published": "$(date +%Y-%m-%d)",
-  "notes": "${NOTES//\"/\\\"}",
-  "mac": { "url": "$BASE/SparkSustain-Mac-$VERSION.zip", "sha256": "$MAC_SHA" },
-  "windows": { "url": "$BASE/SparkSustain-Windows-$VERSION.zip", "sha256": "$WIN_SHA" }
-}
-EOF
+VERSION="$VERSION" NOTES="$NOTES" BASE="$BASE" MAC_SHA="$MAC_SHA" WIN_SHA="$WIN_SHA" \
+python3 - > "$PROJECT/updates/manifest.json" <<'PY'
+import json, os, datetime
+v, base = os.environ["VERSION"], os.environ["BASE"]
+print(json.dumps({
+    "version":   v,
+    "published": datetime.date.today().isoformat(),
+    "notes":     os.environ.get("NOTES", ""),
+    "mac":     {"url": f"{base}/SparkSustain-Mac-{v}.zip",     "sha256": os.environ["MAC_SHA"]},
+    "windows": {"url": f"{base}/SparkSustain-Windows-{v}.zip", "sha256": os.environ["WIN_SHA"]},
+}, indent=2))
+PY
+python3 -c "import json,sys; json.load(open('$PROJECT/updates/manifest.json'))" \
+  || { echo "ERROR: generated manifest is not valid JSON"; exit 1; }
 cd "$PROJECT"
 git add updates/manifest.json
 git commit -m "Release v$VERSION" -m "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" >/dev/null || true
 git push origin main
 
 echo ""
-echo "Published v$VERSION"
-echo "  release: https://github.com/$REPO/releases/tag/v$VERSION"
+if (( HAVE_GH )); then
+  echo "Published v$VERSION"
+  echo "  release: https://github.com/$REPO/releases/tag/v$VERSION"
+else
+  echo "Manifest pushed. ONE STEP LEFT — upload these two files as release assets:"
+  echo "  $STAGE/SparkSustain-Mac-$VERSION.zip"
+  echo "  $STAGE/SparkSustain-Windows-$VERSION.zip"
+  echo "  at: https://github.com/$REPO/releases/new?tag=v$VERSION"
+  echo "  (install gh + 'gh auth login' to skip this step next time)"
+fi
 echo "  mac     $MAC_SHA"
 echo "  windows $WIN_SHA"
 echo "Every install picks this up within ~4 hours (or via Check for Updates Now)."

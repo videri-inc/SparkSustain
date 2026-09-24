@@ -1679,6 +1679,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: Menu
 
+    /// The Videri V mark, drawn as a template image so the menu bar tints it
+    /// for light/dark automatically. Solid = Sparks lit, dimmed = dark. The
+    /// reason they're dark (asleep, away, off desk power, manual hold) is in
+    /// the tooltip and the menu — a second glyph at this size just muddies
+    /// the mark.
+    private func makeMenuBarIcon(on: Bool) -> NSImage {
+        let image = NSImage(size: NSSize(width: 18, height: 18))
+        image.lockFocus()
+        let alpha: CGFloat = on ? 1.0 : 0.40
+        NSColor.black.withAlphaComponent(alpha).setStroke()
+        NSColor.black.withAlphaComponent(alpha).setFill()
+
+        // The mark's diagonal, upper-left down to lower-right, rounded caps.
+        let bar = NSBezierPath()
+        bar.move(to: NSPoint(x: 3.4, y: 14.8))
+        bar.line(to: NSPoint(x: 9.4, y: 3.3))
+        bar.lineWidth = 3.4
+        bar.lineCapStyle = .round
+        bar.stroke()
+
+        // The counterpoint dot, upper right.
+        NSBezierPath(ovalIn: NSRect(x: 12.1, y: 11.6, width: 4.3, height: 4.3)).fill()
+
+        image.unlockFocus()
+        image.isTemplate = true
+        return image
+    }
+
     private func updateIcon() {
         guard let button = statusItem.button else { return }
         let config = loadConfig() ?? Config.template
@@ -1688,21 +1716,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             on = screensAwake && isOnOfficeNetwork(config) && isOnDeskPower(config)
         }
-        let symbol: String
-        let fallback: String
-        if !screensAwake {
-            symbol = "moon.fill"; fallback = "🌙"
-        } else if on {
-            symbol = "sun.max.fill"; fallback = "☀️"
-        } else {
-            symbol = "location.slash"; fallback = "🚫"
-        }
-        if let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "SparkSustain") {
-            button.image = image
-            button.title = ""
-        } else {
-            button.title = fallback
-        }
+        button.image = makeMenuBarIcon(on: on)
+        button.title = ""
+        button.toolTip = "SparkSustain — " + stateLabel(inOffice: isOnOfficeNetwork(config))
     }
 
     private func rebuildMenu() {
