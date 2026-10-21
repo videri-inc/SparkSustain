@@ -398,7 +398,7 @@ final class VideriClient {
         let headers = try authHeaders(config, tenant: tenant)
         let url = URL(string: "\(config.api_base_url)/rpm/v1/users/me/groups_access")!
         let result = try httpRequest(method: "GET", url: url, headers: headers, jsonBody: nil)
-        if result.status == 401 { invalidateToken() }
+        if result.status == 401 || result.status == 403 { invalidateToken() }
         guard (200..<300).contains(result.status),
               let json = try? JSONSerialization.jsonObject(with: result.body) as? [String: Any],
               let access = json["groupAccess"] as? [[String: Any]] else {
@@ -460,7 +460,7 @@ final class VideriClient {
                     groupError = nil
                     break
                 }
-                if result.status == 401 { invalidateToken() }
+                if result.status == 401 || result.status == 403 { invalidateToken() }
                 groupError = "HTTP \(result.status) at \(path): \(result.bodyString.prefix(120))"
             }
             if let groupError = groupError { errors.append("\(tenant): \(groupError)") }
@@ -484,7 +484,7 @@ final class VideriClient {
         let url = URL(string: urlString)!
         let result = try httpRequest(method: "GET", url: url, headers: headers, jsonBody: nil)
         guard (200..<300).contains(result.status) else {
-            if result.status == 401 { invalidateToken() }
+            if result.status == 401 || result.status == 403 { invalidateToken() }
             throw HTTPError.transport("HTTP \(result.status): \(result.bodyString.prefix(300))")
         }
         guard let json = try? JSONSerialization.jsonObject(with: result.body) as? [String: Any] else {
@@ -593,7 +593,7 @@ final class VideriClient {
             let url = URL(string: "\(config.api_base_url)/messaging-websocket/messaging/sync_command")!
             let body = try JSONSerialization.data(withJSONObject: payload)
             let result = try httpRequest(method: "POST", url: url, headers: headers, jsonBody: body)
-            if result.status == 401 { invalidateToken() }
+            if result.status == 401 || result.status == 403 { invalidateToken() }
             guard (200..<300).contains(result.status) else {
                 return "HTTP \(result.status): \(result.bodyString.prefix(150))"
             }
@@ -935,6 +935,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// automation. .distantFuture = until the user resumes automation.
     private var overrideUntil: Date?
     private var overridePercent = 0
+    /// Set from NWPathMonitor; commands are pointless without a route and
+    /// just fill the log with timeouts while the laptop is away or asleep.
+    private var networkAvailable = true
+    private var offlineLogged = false
 
     // MARK: Decision logic
 
@@ -1006,8 +1010,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         center.addObserver(self, selector: #selector(machineWillSleep),
                            name: NSWorkspace.willSleepNotification, object: nil)
 
-        pathMonitor.pathUpdateHandler = { [weak self] _ in
+        pathMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
+            let reachable = (path.status == .satisfied)
+            if reachable != self.networkAvailable {
+                self.networkAvailable = reachable
+                if reachable { self.offlineLogged = false }
+                log("Network \(reachable ? "available" : "unavailable")")
+            }
             self.networkDebounce?.cancel()
             let work = DispatchWorkItem { self.reconcile(reason: "network changed") }
             self.networkDebounce = work
@@ -1586,6 +1596,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.rebuildMenu()
         }
         guard force || lastApplied != percent else { return }
+        guard networkAvailable else {
+            if !offlineLogged {
+                offlineLogged = true
+                log("Offline — holding \(percent)% until the network returns (\(reason))")
+            }
+            statusLine = "Offline — will sync when the network returns"
+            DispatchQueue.main.async { self.rebuildMenu() }
+            return
+        }
         statusLine = "\(stateLabel(inOffice: inOffice)) — applying \(percent)%…"
         workQueue.async {
             do {
@@ -1819,6 +1838,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         deskItem.state = config.desk_power == nil ? .off : .on
         menu.addItem(deskItem)
         menu.addItem(makeItem("Discover Canvases…", #selector(discover)))
+        let share = NSMenuItem(title: "Share SparkSustain", action: nil, keyEquivalent: "")
+        let shareMenu = NSMenu(title: "Share SparkSustain")
+        shareMenu.addItem(makeItem("Copy Invite Message", #selector(copyShareInvite)))
+        shareMenu.addItem(makeItem("Copy Download Link", #selector(copyShareLink)))
+        shareMenu.addItem(makeItem("Open Download Page", #selector(openSharePage)))
+        share.submenu = shareMenu
+        menu.addItem(share)
         menu.addItem(makeItem("Help", #selector(openManual)))
         menu.addItem(makeItem("View Log", #selector(viewLog)))
         menu.addItem(.separator())
@@ -1855,6 +1881,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let manifestURL = config.update_url ?? defaultUpdateManifestURL
         workQueue.async {
             guard let manifest = Updater.fetchManifest(from: manifestURL) else {
+                // Log even for background checks: a fleet that has quietly
+                // stopped updating should be diagnosable from the log.
+                log("Update check failed — couldn't read \(manifestURL)")
                 if interactive {
                     self.statusLine = "Couldn't reach the update feed (offline, or the repo is private)"
                     DispatchQueue.main.async { self.rebuildMenu() }
@@ -1972,6 +2001,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             DispatchQueue.main.async { self.rebuildMenu() }
         }
+    }
+
+    // MARK: Sharing
+
+    /// Where colleagues get their own copy. Points at the latest release so
+    /// the link never needs revising per version.
+    static let downloadURL = "https://github.com/videri-inc/SparkSustain/releases/latest"
+
+    private func copyToPasteboard(_ text: String, confirmation: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        statusLine = confirmation
+        log(confirmation)
+        rebuildMenu()
+    }
+
+    @objc private func copyShareInvite() {
+        copyToPasteboard("SparkSustain keeps the Videri Sparks at your desk in step with your laptop — on at the brightness you pick while you're working there, dark when you're asleep, away, or off your desk power. macOS and Windows, no brightness schedules to maintain.\n\nDownload: " + AppDelegate.downloadURL,
+                         confirmation: "Invite message copied — paste it anywhere")
+    }
+
+    @objc private func copyShareLink() {
+        copyToPasteboard(AppDelegate.downloadURL, confirmation: "Download link copied")
+    }
+
+    @objc private func openSharePage() {
+        if let url = URL(string: AppDelegate.downloadURL) { NSWorkspace.shared.open(url) }
     }
 
     /// Open the bundled instruction manual in the default browser.
