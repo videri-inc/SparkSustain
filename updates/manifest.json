@@ -1,13 +1,13 @@
 {
-  "version": "1.10",
+  "version": "1.11",
   "published": "2026-10-21",
-  "notes": "v1.10 \u2014 Share menu, offline hold, re-auth on 403.",
+  "notes": "v1.11 \u2014 support via GitHub Issues; bundle identifier no longer carries a personal name.",
   "mac": {
-    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.10/SparkSustain-Mac-1.10.zip",
-    "sha256": "088a7e382656759a857f73ddca67f1068980af40b3853732fb6cf1148669f977"
+    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.11/SparkSustain-Mac-1.11.zip",
+    "sha256": "103d0e97ffc0fb217fbc2b2ef7df5aa7d7a2da8fa05cb421b9ac1f413fa997c3"
   },
   "windows": {
-    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.10/SparkSustain-Windows-1.10.zip",
-    "sha256": "477856ee21305d124dcee9999ac7f8fc7859da94d5b8071948160583e7e46c14"
+    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.11/SparkSustain-Windows-1.11.zip",
+    "sha256": "d31a1022b174b151a58258a061e58781c086b004c48397d32e06bd8ee795cbb7"
   }
 }
