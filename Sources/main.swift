@@ -39,9 +39,9 @@ func log(_ message: String) {
 
 /// Folder shared with the sandboxed Control Center extension.
 let sharedControlDir = FileManager.default
-    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.videri.jay.sparksustain")
+    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.videri.sparksustain")
     ?? FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Library/Group Containers/group.com.videri.jay.sparksustain")
+        .appendingPathComponent("Library/Group Containers/group.com.videri.sparksustain")
 
 /// Publish the Sparks' on/off state for the Control Center control and ask
 /// the system to refresh it.

@@ -8,11 +8,11 @@ import WidgetKit
 // requests and sends the actual device commands.
 
 // Shared app-group container — the sandboxed extension and the app both
-// resolve to ~/Library/Group Containers/group.com.videri.jay.sparksustain
+// resolve to ~/Library/Group Containers/group.com.videri.sparksustain
 let sparkStateDir = FileManager.default
-    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.videri.jay.sparksustain")
+    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.videri.sparksustain")
     ?? FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Library/Group Containers/group.com.videri.jay.sparksustain")
+        .appendingPathComponent("Library/Group Containers/group.com.videri.sparksustain")
 
 func sparkStateIsOn() -> Bool {
     let url = sparkStateDir.appendingPathComponent("control-state.json")
@@ -43,7 +43,7 @@ struct ToggleSparksIntent: SetValueIntent {
 
 struct SparkSustainControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "com.videri.jay.sparksustain.toggle",
+        StaticControlConfiguration(kind: "com.videri.sparksustain.toggle",
                                    provider: Provider()) { isOn in
             ControlWidgetToggle("Spark Screens", isOn: isOn, action: ToggleSparksIntent()) { on in
                 Label(on ? "Sparks On" : "Sparks Off",
