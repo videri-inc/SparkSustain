@@ -1,13 +1,13 @@
 {
-  "version": "1.8",
-  "published": "2026-09-14",
-  "notes": "v1.8 \u2014 first release from the Videri org repo. Auto-update, workspace scoping with sub-workspace tree, manual holds, verified desk signatures.",
+  "version": "1.10",
+  "published": "2026-10-21",
+  "notes": "v1.10 \u2014 Share menu, offline hold, re-auth on 403.",
   "mac": {
-    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.8/SparkSustain-Mac-1.8.zip",
-    "sha256": "09a68b725957f8d42bc3ddf836da023a60907479ca47c98719c821a57e045f79"
+    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.10/SparkSustain-Mac-1.10.zip",
+    "sha256": "088a7e382656759a857f73ddca67f1068980af40b3853732fb6cf1148669f977"
   },
   "windows": {
-    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.8/SparkSustain-Windows-1.8.zip",
-    "sha256": "90e3a8349d051fb07021aeac752f0bb5544436aabc0d211e1cd6e220eac1f5bf"
+    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.10/SparkSustain-Windows-1.10.zip",
+    "sha256": "477856ee21305d124dcee9999ac7f8fc7859da94d5b8071948160583e7e46c14"
   }
 }
