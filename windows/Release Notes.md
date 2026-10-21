@@ -1,5 +1,14 @@
 # SparkSustain — Release Notes
 
+## Version 1.11 — October 21, 2026
+
+- Support now points at GitHub Issues rather than a personal email address.
+- The app's bundle identifier drops its personal segment:
+  `com.videri.jay.sparksustain` becomes `com.videri.sparksustain`.
+  **After updating, re-tick "Start at Login" from the menu** — macOS keys
+  login items to the bundle identifier, so the old registration doesn't
+  carry over. Your settings, credentials and Spark selections are kept.
+
 ## Version 1.10 — October 21, 2026
 
 - **Share SparkSustain** added to the menu: copy a ready-to-send invite

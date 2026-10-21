@@ -40,6 +40,6 @@ optional desk power/dock requirement.
 
 This Windows port is **feature-complete but young** — the Mac version has been
 exercised against real Sparks; the Windows build compiles on first install and
-any error is shown in the installer window. If something misbehaves, send
-Jay (jay.leedy@videri.com) the text from the installer window or from
-**View Log** in the tray menu.
+any error is shown in the installer window. If something misbehaves, open an
+issue at https://github.com/videri-inc/SparkSustain/issues with the text from
+the installer window or from **View Log** in the tray menu.
