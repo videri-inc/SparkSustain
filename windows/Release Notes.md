@@ -1,5 +1,19 @@
 # SparkSustain — Release Notes
 
+## Version 1.10 — October 21, 2026
+
+- **Share SparkSustain** added to the menu: copy a ready-to-send invite
+  message, copy the download link, or open the download page.
+- **Quieter and kinder when offline.** The app no longer fires commands at
+  the API when the machine has no network route — it holds the intended
+  state and applies it the moment connectivity returns. A month of logs was
+  dominated by timeouts from the laptop being asleep or away.
+- **Recover from a stale token on 403 as well as 401.** One 403 in a month
+  of running traced to a platform auth hiccup; the app now re-authenticates
+  instead of waiting for the next cycle.
+- **Background update checks now log their failures** instead of failing
+  silently, so a fleet that has quietly stopped updating is diagnosable.
+
 ## Version 1.9 — September 24, 2026
 
 - **New menu bar / tray icon.** The old sun glyph was the same SF Symbol most

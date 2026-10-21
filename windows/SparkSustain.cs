@@ -32,7 +32,7 @@ namespace SparkSustain
 
     public static class AppInfo
     {
-        public const string Version = "1.9";
+        public const string Version = "1.10";
         // Manifest on the repo's main branch; zips are release assets.
         public const string DefaultUpdateUrl =
             "https://raw.githubusercontent.com/videri-inc/SparkSustain/main/updates/manifest.json";
@@ -397,7 +397,7 @@ namespace SparkSustain
             int status;
             var text = Http("GET", c.api_base_url + "/rpm/v1/users/me/groups_access",
                             Token(c), tenant, null, out status);
-            if (status == 401) InvalidateToken();
+            if (status == 401 || status == 403) InvalidateToken();
             if (status < 200 || status >= 300)
                 throw new Exception("groups_access HTTP " + status);
             var dict = json.Deserialize<Dictionary<string, object>>(text);
@@ -451,7 +451,7 @@ namespace SparkSustain
             if (groupUuids != null && groupUuids.Count > 0)
                 url += "&group_uuid=" + string.Join(",", groupUuids);
             var text = Http("GET", url, Token(c), tenant, null, out status);
-            if (status == 401) InvalidateToken();
+            if (status == 401 || status == 403) InvalidateToken();
             if (status < 200 || status >= 300)
                 throw new Exception("HTTP " + status + ": " + Truncate(text, 200));
             var dict = json.Deserialize<Dictionary<string, object>>(text);
@@ -566,7 +566,7 @@ namespace SparkSustain
                 var text = Http("POST",
                     c.api_base_url + "/messaging-websocket/messaging/sync_command",
                     Token(c), tenant, json.Serialize(payload), out status);
-                if (status == 401) InvalidateToken();
+                if (status == 401 || status == 403) InvalidateToken();
                 if (status < 200 || status >= 300)
                     return "HTTP " + status + ": " + Truncate(text, 150);
                 var dict = json.Deserialize<Dictionary<string, object>>(text);
@@ -672,7 +672,7 @@ namespace SparkSustain
                         groupError = null;
                         break;
                     }
-                    if (status == 401) InvalidateToken();
+                    if (status == 401 || status == 403) InvalidateToken();
                     groupError = "HTTP " + status + " at " + path;
                 }
                 if (groupError != null) errors.Add(group.Key + ": " + groupError);
@@ -1104,6 +1104,7 @@ namespace SparkSustain
         // DateTime.MaxValue = until the user resumes automation.
         DateTime overrideUntil = DateTime.MinValue;
         int overridePercent = 0;
+        bool offlineLogged = false;
         string statusLine = "Waiting for first event";
         System.Windows.Forms.Timer pollTimer;
         System.Windows.Forms.Timer enforceTimer;
@@ -1330,6 +1331,34 @@ namespace SparkSustain
             return span.TotalSeconds < 60 ? TimeSpan.FromMinutes(1) : span;
         }
 
+        // Where colleagues get their own copy. Points at the latest release
+        // so the link never needs revising per version.
+        const string DownloadUrl = "https://github.com/videri-inc/SparkSustain/releases/latest";
+
+        static string InviteText()
+        {
+            return "SparkSustain keeps the Videri Sparks at your desk in step with your laptop "
+                 + "— on at the brightness you pick while you're working there, dark when you're "
+                 + "asleep, away, or off your desk power. macOS and Windows, no brightness "
+                 + "schedules to maintain.\r\n\r\nDownload: " + DownloadUrl;
+        }
+
+        void CopyToClipboard(string text, string confirmation)
+        {
+            try
+            {
+                Clipboard.SetText(text);
+                statusLine = confirmation;
+                Log.Write(confirmation);
+            }
+            catch (Exception e)
+            {
+                statusLine = "Couldn't copy to the clipboard";
+                Log.Write("Clipboard copy failed: " + e.Message);
+            }
+            RebuildMenu();
+        }
+
         void CheckForUpdates(bool interactive)
         {
             var c = Store.Load() ?? new Config();
@@ -1432,6 +1461,18 @@ namespace SparkSustain
             int percent = DesiredPercent(c);
             tray.Icon = MakeIcon(percent > 0);
             if (!force && lastApplied == percent) { RebuildMenu(); return; }
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                if (!offlineLogged)
+                {
+                    offlineLogged = true;
+                    Log.Write("Offline — holding " + percent + "% until the network returns (" + reason + ")");
+                }
+                statusLine = "Offline — will sync when the network returns";
+                RebuildMenu();
+                return;
+            }
+            offlineLogged = false;
             statusLine = "Applying " + percent + "%…";
             RebuildMenu();
             ThreadPool.QueueUserWorkItem(delegate
@@ -1834,6 +1875,20 @@ namespace SparkSustain
             versionItem.Enabled = false;
             menu.Items.Add(versionItem);
             menu.Items.Add("Check for Updates Now", null, delegate { CheckForUpdates(true); });
+            var share = new ToolStripMenuItem("Share SparkSustain");
+            share.DropDownItems.Add("Copy Invite Message", null, delegate
+            {
+                CopyToClipboard(InviteText(), "Invite message copied — paste it anywhere");
+            });
+            share.DropDownItems.Add("Copy Download Link", null, delegate
+            {
+                CopyToClipboard(DownloadUrl, "Download link copied");
+            });
+            share.DropDownItems.Add("Open Download Page", null, delegate
+            {
+                try { Process.Start(DownloadUrl); } catch (Exception e) { Log.Write("Share open failed: " + e.Message); }
+            });
+            menu.Items.Add(share);
             menu.Items.Add("Help", null, delegate
             {
                 string manual = Path.Combine(
