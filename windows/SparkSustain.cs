@@ -32,7 +32,7 @@ namespace SparkSustain
 
     public static class AppInfo
     {
-        public const string Version = "1.11";
+        public const string Version = "1.12";
         // Manifest on the repo's main branch; zips are release assets.
         public const string DefaultUpdateUrl =
             "https://raw.githubusercontent.com/videri-inc/SparkSustain/main/updates/manifest.json";
@@ -1238,7 +1238,10 @@ namespace SparkSustain
             }
             else if (e.Mode == PowerModes.Resume)
             {
-                screensAwake = true;
+                // Resume fires for modern-standby maintenance wakes too, where
+                // the machine is briefly up with the screen still off. Don't
+                // claim the displays are on — the GUID_CONSOLE_DISPLAY_STATE
+                // notification is the authority and will say so if they are.
                 Reconcile("system resumed", false);
             }
         }
