@@ -1,13 +1,13 @@
 {
-  "version": "1.11",
-  "published": "2026-10-21",
-  "notes": "v1.11 \u2014 support via GitHub Issues; bundle identifier no longer carries a personal name.",
+  "version": "1.12",
+  "published": "2026-10-24",
+  "notes": "v1.12 \u2014 fixes Sparks switching on during macOS dark wakes.",
   "mac": {
-    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.11/SparkSustain-Mac-1.11.zip",
-    "sha256": "103d0e97ffc0fb217fbc2b2ef7df5aa7d7a2da8fa05cb421b9ac1f413fa997c3"
+    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.12/SparkSustain-Mac-1.12.zip",
+    "sha256": "bd82239b17e0eb751205f92936447677d6ef41c760dd2a311f1e1127d82a0396"
   },
   "windows": {
-    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.11/SparkSustain-Windows-1.11.zip",
-    "sha256": "d31a1022b174b151a58258a061e58781c086b004c48397d32e06bd8ee795cbb7"
+    "url": "https://github.com/videri-inc/SparkSustain/releases/download/v1.12/SparkSustain-Windows-1.12.zip",
+    "sha256": "1da04c5a66c58288c040842a2caaa12a15937f114baa4085facee60f8662abb7"
   }
 }
