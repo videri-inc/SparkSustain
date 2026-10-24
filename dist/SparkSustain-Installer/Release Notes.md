@@ -1,5 +1,23 @@
 # SparkSustain — Release Notes
 
+## Version 1.12 — October 24, 2026
+
+### Fixed: screens waking on their own overnight
+- macOS performs hundreds of **dark wakes** a day — maintenance wakes where
+  the machine briefly runs with the display still off (Power Nap, network
+  upkeep, backups). On one machine: 920 dark wakes and 2,317 maintenance
+  wakes in three days, against 10 real wakes.
+- `didWake` fires for those exactly as it does for a real wake, and
+  SparkSustain believed it — turning the Sparks on at 3am with the lid shut.
+- The app now asks the window server whether the displays are genuinely lit
+  rather than inferring it from a notification, and re-checks every three
+  seconds, so a missed or misleading notification can no longer strand it in
+  the wrong state.
+- Windows: the same flaw on modern-standby resume is fixed the same way —
+  resume no longer asserts the displays are on.
+- Every state change now records *why* in the log
+  (`State 70% → 0% (screens slept)`), which is what made this diagnosable.
+
 ## Version 1.11 — October 21, 2026
 
 - Support now points at GitHub Issues rather than a personal email address.
