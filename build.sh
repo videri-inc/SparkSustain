@@ -41,8 +41,8 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
     <key>CFBundleName</key><string>SparkSustain</string>
     <key>CFBundleDisplayName</key><string>SparkSustain</string>
     <key>CFBundleIdentifier</key><string>com.videri.sparksustain</string>
-    <key>CFBundleVersion</key><string>1.11</string>
-    <key>CFBundleShortVersionString</key><string>1.11</string>
+    <key>CFBundleVersion</key><string>1.12</string>
+    <key>CFBundleShortVersionString</key><string>1.12</string>
     <key>CFBundleExecutable</key><string>SparkSustain</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
@@ -87,8 +87,8 @@ if [[ -d "$XCODE_DEV" ]]; then
     <key>CFBundleName</key><string>SparkSustainControl</string>
     <key>CFBundleDisplayName</key><string>Spark Screens</string>
     <key>CFBundleIdentifier</key><string>com.videri.sparksustain.control</string>
-    <key>CFBundleVersion</key><string>1.11</string>
-    <key>CFBundleShortVersionString</key><string>1.11</string>
+    <key>CFBundleVersion</key><string>1.12</string>
+    <key>CFBundleShortVersionString</key><string>1.12</string>
     <key>CFBundleExecutable</key><string>SparkSustainControl</string>
     <key>CFBundlePackageType</key><string>XPC!</string>
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
