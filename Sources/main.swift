@@ -1,5 +1,6 @@
 import AppKit
 import Carbon.HIToolbox
+import CoreGraphics
 import CryptoKit
 import Foundation
 import IOKit
@@ -54,6 +55,20 @@ func writeControlState(on: Bool) {
         ControlCenter.shared.reloadAllControls()
     }
     #endif
+}
+
+// MARK: - Display state
+
+/// Whether the screens are genuinely lit.
+///
+/// macOS performs hundreds of *dark wakes* a day — maintenance wakes where
+/// the machine briefly runs with the display still off (Power Nap, network
+/// upkeep, Time Machine). `NSWorkspace.didWakeNotification` fires for those
+/// exactly as it does for a real wake, so the notification alone is not
+/// evidence the user is back at the desk; believing it lit the Sparks at
+/// 3am. The window server knows the truth, so ask it.
+func screensAreOn() -> Bool {
+    CGDisplayIsAsleep(CGMainDisplayID()) == 0
 }
 
 // MARK: - Desk power detection
@@ -1039,9 +1054,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     log("Desk power \(powerOK ? "connected" : "disconnected")")
                 }
             }
+            let on = screensAreOn()
+            if on != self.screensAwake {
+                self.screensAwake = on
+                log("Displays now \(on ? "on" : "off") (polled)")
+            }
             guard self.automationEnabled else { return }
             if self.desiredPercent(config) != self.lastApplied {
-                self.reconcile(reason: "power source changed")
+                self.reconcile(reason: on ? "displays/power changed" : "displays off")
             }
         }
 
@@ -1552,9 +1572,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: Sleep/wake events
 
-    @objc private func screensDidWake() { screensAwake = true; reconcile(reason: "screens woke") }
-    @objc private func machineDidWake() { screensAwake = true; reconcile(reason: "system woke") }
+    /// Wake notifications say "something woke", not "the screens are on" —
+    /// a dark wake fires them too. Take the display state as the answer.
+    @objc private func screensDidWake() { syncScreenState(reason: "screens woke") }
+    @objc private func machineDidWake() { syncScreenState(reason: "system woke") }
     @objc private func screensDidSleep() { screensAwake = false; reconcile(reason: "screens slept") }
+
+    private func syncScreenState(reason: String) {
+        let on = screensAreOn()
+        screensAwake = on
+        if !on {
+            log("\(reason) — but the displays are still off (dark wake); staying dark")
+        }
+        reconcile(reason: on ? reason : "\(reason) (dark wake)")
+    }
 
     @objc private func machineWillSleep() {
         // Run synchronously: macOS holds sleep briefly for apps handling
@@ -1608,9 +1639,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusLine = "\(stateLabel(inOffice: inOffice)) — applying \(percent)%…"
         workQueue.async {
             do {
+                let previous = self.lastApplied
                 let message = try self.client.setBrightness(percent: percent, config: config)
                 self.lastApplied = percent
                 writeControlState(on: percent > 0)
+                if previous != percent {
+                    log("State \(previous.map { "\($0)%" } ?? "unset") → \(percent)% (\(reason))")
+                }
                 self.statusLine = "\(self.stateLabel(inOffice: inOffice)) — \(message) (\(reason))"
             } catch {
                 self.statusLine = "Failed: \(error)"
